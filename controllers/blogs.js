@@ -2,6 +2,7 @@ const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 const { Blog, User } = require('../models')
 const { SECRET } = require('../util/config')
+const { Op } = require('sequelize')
 
 const blogFinder = async (req, res, next) => {
   req.blog = await Blog.findByPk(req.params.id)
@@ -9,10 +10,31 @@ const blogFinder = async (req, res, next) => {
 }
 
 router.get('/', async (req, res) => {
+  let where = {}
+  if (req.query.search) {
+    where = {
+      [Op.or]: [
+        {
+          title: {
+            [Op.match]: req.query.search
+          }
+        },
+        {
+          author: {
+            [Op.match]: req.query.search
+          }
+        }
+      ]
+    }
+  }
   const blogs = await Blog.findAll({
     include: {
       model: User
-    }
+    },
+    where,
+    order: [
+      ['likes', 'DESC']
+    ]
   })
   res.json(blogs)
 })
@@ -44,10 +66,10 @@ router.delete('/:id', tokenExtractor, blogFinder, async (req, res) => {
       await req.blog.destroy()
       res.status(204).end()
     } else {
-      res.status(401).json({ error: 'Unauthorized deletion'})
+      res.status(401).json({ error: 'Unauthorized deletion' })
     }
   } else {
-    res.status(401).json({ error: 'Invalid blog id'})
+    res.status(401).json({ error: 'Invalid blog id' })
   }
 })
 
