@@ -1,4 +1,4 @@
-const {  Model, DataTypes } = require('sequelize')
+const { Model, DataTypes, fn } = require('sequelize')
 
 const { sequelize } = require('../util/db')
 
@@ -23,11 +23,20 @@ Blog.init({
   likes: {
     type: DataTypes.INTEGER,
     defaultValue: 0
+  },
+  year: {
+    type: DataTypes.INTEGER,
+    validate: {
+      isIt(value) {
+        if (!(value >= 1991 && value < new Date().getFullYear())) {
+          throw new Error('Year must be between 1991 and last year')
+        }
+      }
+    }
   }
 }, {
   sequelize,
   underscored: true,
-  timestamps: false,
   modelName: 'blog'
 })
 
