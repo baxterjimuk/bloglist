@@ -1,4 +1,4 @@
-const { Model, DataTypes, ValidationError } = require('sequelize')
+const { Model, DataTypes } = require('sequelize')
 
 const { sequelize } = require('../util/db')
 
@@ -20,6 +20,10 @@ User.init({
     type: DataTypes.STRING,
     allowNull: false
   },
+  disabled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
 }, {
   sequelize,
   underscored: true,
